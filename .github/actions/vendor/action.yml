@@ -1,0 +1,22 @@
+name: vendor
+
+inputs:
+  branch:
+    type:     string
+    required: true
+  message:
+    type:     string
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - run: |
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git config user.name "github-actions[bot]"
+      shell: bash
+    - run: $GITHUB_ACTION_PATH/vendor.sh
+      env:
+        BRANCH: ${{ inputs.branch }}
+        MESSAGE: ${{ inputs.message }}
+      shell: bash

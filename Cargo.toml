@@ -1,0 +1,7 @@
+[package]
+name    = "rustxc"
+version = "0.0.1"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.66"

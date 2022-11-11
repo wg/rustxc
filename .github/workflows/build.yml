@@ -1,0 +1,46 @@
+name: build
+
+on:
+  push:
+
+jobs:
+  # build:
+  #   strategy:
+  #     matrix:
+  #       include:
+  #         - target: aarch64-apple-darwin
+  #           system: macos-12
+  #           output: rustxc-macos-arm64
+  #         - target: aarch64-pc-windows-msvc
+  #           system: windows-2022
+  #           output: rustxc-windows-arm64.exe
+  #         - target: aarch64-unknown-linux-musl
+  #           system: ubuntu-22.04
+  #           output: rustxc-linux-arm64
+  #         - target: x86_64-apple-darwin
+  #           system: macos-12
+  #           output: rustxc-macos-amd64
+  #         - target: x86_64-pc-windows-msvc
+  #           system: windows-2022
+  #           output: rustxc-windows-amd64.exe
+  #         - target: x86_64-unknown-linux-musl
+  #           system: ubuntu-22.04
+  #   runs-on: ${{ matrix.system }}
+  #   name: ${{ matrix.target }}
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         fetch-depth: 1
+  #     - uses: ./.github/actions/build
+  #       with:
+  #         target: ${{ matrix.target }}
+  vendor:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/vendor
+        with:
+          branch: release
+          message: vendor dependencies @ 1.0.0
