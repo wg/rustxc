@@ -43,4 +43,4 @@ jobs:
       - uses: ./.github/actions/vendor
         with:
           branch: release
-          message: vendor dependencies @ 1.0.0
+          message: vendor dependencies @ 1.0.1
