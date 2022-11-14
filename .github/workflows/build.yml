@@ -4,43 +4,58 @@ on:
   push:
 
 jobs:
-  # build:
-  #   strategy:
-  #     matrix:
-  #       include:
-  #         - target: aarch64-apple-darwin
-  #           system: macos-12
-  #           output: rustxc-macos-arm64
-  #         - target: aarch64-pc-windows-msvc
-  #           system: windows-2022
-  #           output: rustxc-windows-arm64.exe
-  #         - target: aarch64-unknown-linux-musl
-  #           system: ubuntu-22.04
-  #           output: rustxc-linux-arm64
-  #         - target: x86_64-apple-darwin
-  #           system: macos-12
-  #           output: rustxc-macos-amd64
-  #         - target: x86_64-pc-windows-msvc
-  #           system: windows-2022
-  #           output: rustxc-windows-amd64.exe
-  #         - target: x86_64-unknown-linux-musl
-  #           system: ubuntu-22.04
-  #   runs-on: ${{ matrix.system }}
-  #   name: ${{ matrix.target }}
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #       with:
-  #         fetch-depth: 1
-  #     - uses: ./.github/actions/build
-  #       with:
-  #         target: ${{ matrix.target }}
-  vendor:
-    runs-on: ubuntu-22.04
+  build:
+    strategy:
+      matrix:
+        include:
+          - target: aarch64-apple-darwin
+            runner: macos-12
+          - target: aarch64-pc-windows-msvc
+            runner: windows-2022
+          - target: aarch64-unknown-linux-musl
+            runner: ubuntu-22.04
+          - target: x86_64-apple-darwin
+            runner: macos-12
+          - target: x86_64-pc-windows-msvc
+            runner: windows-2022
+          - target: x86_64-unknown-linux-musl
+            runner: ubuntu-22.04
+    runs-on: ${{ matrix.runner }}
+    name: build ${{ matrix.target }}
     steps:
       - uses: actions/checkout@v3
+      - uses: wg/actions/rust/build@master
         with:
-          fetch-depth: 0
-      - uses: ./.github/actions/vendor
+          target: ${{ matrix.target }}
+        id: build
+      - uses: ./.github/actions/upload
         with:
-          branch: release
-          message: vendor dependencies @ 1.0.0
+          artifact: ${{ steps.build.outputs.artifact }}
+          binary:   ${{ steps.build.outputs.binary   }}
+          location: ${{ steps.build.outputs.location }}
+          manifest: ${{ steps.build.outputs.manifest }}
+      - uses: ./.github/actions/report
+        with:
+          artifact: ${{ steps.build.outputs.artifact }}
+          digest:   ${{ steps.build.outputs.digest   }}
+          manifest: ${{ steps.build.outputs.manifest }}
+
+  test:
+    strategy:
+      matrix:
+        include:
+          - target: aarch64-unknown-linux-musl
+            runner: ubuntu-22.04
+          - target: x86_64-apple-darwin
+            runner: macos-12
+          - target: x86_64-pc-windows-msvc
+            runner: windows-2022
+          - target: x86_64-unknown-linux-musl
+            runner: ubuntu-22.04
+    runs-on: ${{ matrix.runner }}
+    name: test ${{ matrix.target }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/test
+        with:
+          target: ${{ matrix.target }}

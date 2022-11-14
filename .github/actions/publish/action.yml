@@ -1,0 +1,34 @@
+name: publish
+
+inputs:
+  output:
+    type:     string
+    required: true
+  origin:
+    type:     string
+    required: true
+  token:
+    type:     string
+    required: true
+
+outputs:
+  digest:
+    value: ${{ steps.publish.outputs.digest }}
+  location:
+    value: ${{ steps.publish.outputs.location }}
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 19
+    - run: node $GITHUB_ACTION_PATH/action.mjs
+      env:
+        source: ${{ github.repository }}
+        commit: ${{ github.sha }}
+        output: ${{ inputs.output }}
+        origin: ${{ inputs.origin }}
+        token:  ${{ inputs.token }}
+      shell: bash
+      id: publish

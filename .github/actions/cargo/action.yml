@@ -1,0 +1,48 @@
+name: cargo
+
+inputs:
+  command:
+    type:     string
+    required: true
+  target:
+    type:     string
+    required: true
+  profile:
+    type:     string
+    required: false
+    default:  release
+  toolchain:
+    type:     string
+    required: false
+    default:  stable
+  use-cross:
+    type:     boolean
+    required: false
+    default:  false
+
+runs:
+  using: composite
+  steps:
+    - uses: dtolnay/rust-toolchain@1.0
+      with:
+        toolchain: ${{ inputs.toolchain }}
+        targets: ${{ inputs.target }}
+    - run: |
+        case "${{ inputs.use-cross }}" in
+            true) echo "cargo=cross" >> $GITHUB_OUTPUT ;;
+           false) echo "cargo=cargo" >> $GITHUB_OUTPUT ;;
+        esac
+      id: setup
+      shell: bash
+    - run: cargo install cross
+      shell: bash
+      if: steps.setup.outputs.cargo == 'cross'
+    - run: |
+        cargo="${{ steps.setup.outputs.cargo }}"
+
+        command="${{ inputs.command }}"
+        target="${{ inputs.target }}"
+        profile="${{ inputs.profile }}"
+
+        $cargo "$command" --target "$target" --profile "$profile" -vv
+      shell: bash

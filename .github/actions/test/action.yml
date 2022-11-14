@@ -1,0 +1,25 @@
+name: test
+
+inputs:
+  target:
+    type:     string
+    required: true
+  clippy:
+    type:     string
+    required: false
+    default:  true
+
+runs:
+  using: composite
+  steps:
+    - uses: docker/setup-qemu-action@v2
+      if: ${{ !contains(inputs.target, 'x86_64') }}
+    - uses: ./.github/actions/cargo
+      with:
+        command: test
+        target: ${{ inputs.target }}
+    - uses: ./.github/actions/cargo
+      with:
+        command: clippy
+        target: ${{ inputs.target }}
+      if: ${{ inputs.clippy }}
